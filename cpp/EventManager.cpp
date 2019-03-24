@@ -1,15 +1,31 @@
 #include "EventManager.hpp"
 
 
-    
+bool ButtonState::checkPress(){
+    return trig && held;
+}
+
+bool ButtonState::checkRelease(){
+    return trig && !held;
+}
+
+MouseManager::MouseManager(){
+     left.code = SDL_BUTTON_LEFT;
+    right.code = SDL_BUTTON_RIGHT;
+}
+
 void MouseManager::setPos(int x, int y){
         pos.x = x;
         pos.y = y;
 }
 
+bool MouseManager::checkTriggers(){
+    return left.trig || right.trig;
+}
+
 void MouseManager::clearTriggers(){
-    leftClickTrig = false;
-    rightClickTrig = false;
+     left.trig = false;
+    right.trig = false;
 }
 
 void MouseManager::checkPos(SDL_Event& e){
@@ -21,12 +37,14 @@ void MouseManager::checkClick(SDL_Event& e){
     if(e.type == SDL_MOUSEBUTTONDOWN ||
        e.type == SDL_MOUSEBUTTONUP){
         if(e.button.button == SDL_BUTTON_LEFT){
-            leftClick = e.type == SDL_MOUSEBUTTONDOWN;
-            leftClickTrig = true;
+            left.held = e.type == SDL_MOUSEBUTTONDOWN;
+            left.trig = true;
+            left.timestamp = e.button.timestamp;
         }
         if(e.button.button == SDL_BUTTON_RIGHT){
-            rightClick = e.type == SDL_MOUSEBUTTONDOWN;
-            rightClickTrig = true;
+            right.held = e.type == SDL_MOUSEBUTTONDOWN;
+            right.trig = true;
+            right.timestamp = e.button.timestamp;
         }
     }
 }
@@ -43,7 +61,7 @@ KeyboardManager::KeyboardManager(){
 
 void KeyboardManager::setBindings(){
     for(int i = 0; i < ks.size(); i++){
-        ks[i].keycode = ((Uint32*)(&bind))[i];
+        ks[i].code = ((Uint32*)(&bind))[i];
     }
 }
 
@@ -63,7 +81,7 @@ void KeyboardManager::update(SDL_Event& e){
         for(int i = 0; i < ks.size(); i++){
     
     // if event keycode = key[i]'s keycode, and ignore rapid press
-            if(ks[i].keycode == e.key.keysym.scancode &&
+            if(ks[i].code == e.key.keysym.scancode &&
                ks[i].held != (e.key.type == SDL_KEYDOWN)){
                 
                 //record timestamp
@@ -120,8 +138,6 @@ void EventManager::checkEvents(){
     mouse.clearTriggers();
     
     while(SDL_PollEvent(&e)){
-        
-        
         
         k.update(e);
         

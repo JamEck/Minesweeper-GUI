@@ -54,3 +54,19 @@ void Window::clear(Uint32 color){
     
     SDL_RenderClear(ren);
 }
+
+void Window::blit(SDL_Surface* surf, int y, int x, float scale){
+    
+    SDL_Texture* tex = SDL_CreateTextureFromSurface(ren,surf);
+    
+    
+    if(tex == nullptr){
+        printf("Could Not Generate Texture.\n");
+        return;
+    }
+    
+    Rect dest(surf->h*scale, surf->w*scale, x, y);
+    
+    SDL_RenderCopy(ren, tex, NULL, &dest.sdl);
+    SDL_DestroyTexture(tex);
+}

@@ -1,9 +1,7 @@
 #include "Commons.hpp"
 #include <SDL2/SDL.h>
-#include "Window.hpp"
-#include "EventManager.hpp"
-#include <thread>
-#define FPS 60.0f
+#include "Board.hpp"
+#define FPS 20.0f
 
 bool SDLinit(){
     
@@ -17,20 +15,22 @@ bool SDLinit(){
     return true;
 }
 
-void blitToWindow(Window& win, SDL_Surface* surf, int x, int y, float scale = 1.0){
+void showPoint(Window& win, int y, int x){
+    SDL_Rect rec;
+    rec.x = x-2;
+    rec.y = y-2;
+    rec.w = 5;
+    rec.h = 5;
     
-    SDL_Texture* tex = SDL_CreateTextureFromSurface(win.ren,surf);
-    if(tex == nullptr){
-        printf("Could Not Generate Texture.\n");
-        return;
-    }
+    Pixel p;
+    SDL_GetRenderDrawColor(win.ren, &p.r, &p.g, &p.b, &p.a);
+   
+    SDL_SetRenderDrawColor(win.ren, 0xFF, 0x00, 0x00, 0xFF);
+    SDL_RenderDrawRect(win.ren,&rec);
 
-    Rect dest(surf->w*scale, surf->h*scale, x, y);
-    
-    SDL_RenderCopy(win.ren, tex, NULL, &dest.sdl);
-    SDL_DestroyTexture(tex);
+    SDL_SetRenderDrawColor(win.ren, p.r, p.g, p.b, p.a);
+
 }
-
 
 int main(){
     
@@ -38,48 +38,35 @@ int main(){
     SDLinit();
     
     float framePeriod = 1000/FPS;
-    std::cout << framePeriod << std::endl;
+//    std::cout << framePeriod << std::endl;
     Uint32 time = SDL_GetTicks();
     
     Window win;
     EventManager e;
+    Board b(10, 10, 20);
+    b.place(40, 40,  1);
+    
+    win.clear(0x007F00FF);
+    b.display(win);
+    SDL_RenderPresent(win.ren);
     
     std::string rpath = "assets/";
     
     
-    // 60 fps while loop
+    // fps limited while loop
     while(!e.quit){ if(SDL_GetTicks() - time > framePeriod){ time = SDL_GetTicks();
 //        std::this_thread::sleep_for(std::chrono::milliseconds(17));
         e.checkEvents();
         
-        win.clear(0x007F00FF);
+        b.update(e, win);
+        
+        if(b.change){
+            win.clear(0x007F00FF);
+            b.display(win);
+            SDL_RenderPresent(win.ren);
+        }
+        
 
-
-        {
-            SDL_Surface* tile = SDL_LoadBMP((rpath+"tile5.bmp").c_str());
-            blitToWindow(win, tile, 100, 100, 2);
-            SDL_FreeSurface(tile);
-        }
-        
-        if(e.mouse.leftClickTrig){
-            SDL_Surface* tile = SDL_LoadBMP((rpath + "tile1.bmp").c_str());
-            blitToWindow(win, tile, e.mouse.pos.x, e.mouse.pos.y, 3.3);
-            SDL_FreeSurface(tile);
-        }
-        if(e.mouse.rightClickTrig){
-            SDL_Surface* tile = SDL_LoadBMP((rpath + "tile2.bmp").c_str());
-            blitToWindow(win, tile, e.mouse.pos.x, e.mouse.pos.y, 3.3);
-            SDL_FreeSurface(tile);
-        }
-        
-        {
-            SDL_Surface* tile = SDL_LoadBMP((rpath + "mine.bmp").c_str());
-            blitToWindow(win, tile, e.mouse.pos.x-tile->w*3.3, e.mouse.pos.y-tile->h*3.3, 3.3);
-            SDL_FreeSurface(tile);
-        }
-        
-        SDL_RenderPresent(win.ren);
-    
     }}
         
     SDL_Quit();
