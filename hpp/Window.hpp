@@ -11,8 +11,8 @@ public:
     SDL_Surface *surf = nullptr;
     
     int x = 100, y = 100;
-//    int w = 1200, h = 675;
-    int w = 600, h = 480;
+    int w = 1200, h = 600;
+//    int w = 600, h = 480;
     unsigned int length = w*h;
     
     
@@ -20,6 +20,7 @@ public:
     ~Window();
     
     void clear(Uint32 = 0xFF0000FF);
+    void blit(SDL_Surface* surf, int x, int y, float scale = 1.0);
 };
 
 #endif /* Window_hpp */

@@ -7,4 +7,7 @@
 #include <utility>
 #include <chrono>
 #include "Wrappers.hpp"
+#include "Window.hpp"
+#include "EventManager.hpp"
+
 #endif /* Commons_hpp */

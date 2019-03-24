@@ -4,9 +4,21 @@
 #include "Commons.hpp"
 #include <SDL2/SDL.h>
 
+struct ButtonState{
+    bool held = false;
+    bool trig = false;
+    Uint32 timestamp = 0;
+    Uint32 code = 0;
+    
+    bool checkPress();
+    bool checkRelease();
+};
 
 class MouseManager{
 public:
+    
+    MouseManager();
+    
     struct{
         int x = 0;
         int y = 0;
@@ -16,28 +28,18 @@ public:
         int y = 0;
     }vel;
     
-    bool leftClick     = false;
-    bool leftClickTrig = false;
-    bool rightClick     = false;
-    bool rightClickTrig = false;
+    ButtonState  left;
+    ButtonState right;
     
-    void setPos(int, int);
-    void update(SDL_Event&);
+    bool checkTriggers();
     void clearTriggers();
-    
+    void update(SDL_Event&);
+private:
+    void setPos(int, int);
     void checkClick(SDL_Event&);
     void checkPos(SDL_Event&);
 
 };
-
-
-struct ButtonState{
-    bool held = false;
-    bool trig = false;
-    Uint32 timestamp = 0;
-    Uint32 keycode = 0;
-};
-
 
 class KeyboardManager{
 public:
